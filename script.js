@@ -1,7 +1,7 @@
 /* =========================================================
    aut0mat1clol — клиентский скрипт
-   • Переключатель темы (light/dark) с сохранением в localStorage
-   • Подсветка активной вкладки при скролле (scrollspy)
+   • Тема следует за системой, но запоминает ручной выбор
+   • Scrollspy для активной вкладки
    ========================================================= */
 
 (() => {
@@ -11,19 +11,40 @@
     const STORAGE_KEY = "amnyam-theme";
 
     /* ---------- Тема ---------- */
-    const savedTheme = localStorage.getItem(STORAGE_KEY);
-    if (savedTheme === "dark" || savedTheme === "light") {
-        html.setAttribute("data-theme", savedTheme);
-    }
+    // Определяет системную тему: "dark" или "light"
+    const getSystemTheme = () =>
+        window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
+    // Применяет тему (используется после инициализации в <head>)
+    const applyTheme = (theme) => html.setAttribute("data-theme", theme);
+
+    // Применяет системную тему, ТОЛЬКО если пользователь не выбирал вручную
+    const syncWithSystem = () => {
+        if (!localStorage.getItem(STORAGE_KEY)) {
+            applyTheme(getSystemTheme());
+        }
+    };
+
+    /* Кнопка переключения темы */
     const themeBtn = document.querySelector(".theme-toggle");
     if (themeBtn) {
         themeBtn.addEventListener("click", () => {
             const current = html.getAttribute("data-theme") || "light";
             const next = current === "dark" ? "light" : "dark";
-            html.setAttribute("data-theme", next);
-            localStorage.setItem(STORAGE_KEY, next);
+            applyTheme(next);
+            localStorage.setItem(STORAGE_KEY, next); // запоминаем ручной выбор
         });
+    }
+
+    /* Реагируем на смену системной темы (если пользователь не переопределил) */
+    if (window.matchMedia) {
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        // addEventListener — стандарт, addListener — фолбэк для старых Safari
+        if (mq.addEventListener) {
+            mq.addEventListener("change", syncWithSystem);
+        } else if (mq.addListener) {
+            mq.addListener(syncWithSystem);
+        }
     }
 
     /* ---------- Scrollspy для табов ---------- */
