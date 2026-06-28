@@ -517,8 +517,8 @@ main {
 [data-theme="dark"] .run-place.bronze { color: #cd7f32; }
 
 .run-cover {
-    width: 110px;
-    height: 75px;
+    width: 75px;
+    height: 110px;
     background: var(--green-light);
     border-radius: var(--radius-sm);
     object-fit: cover;
